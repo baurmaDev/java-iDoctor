@@ -37,97 +37,24 @@ public class UserController {
     }
 
     @GetMapping("/doctors/{doctorId}/users")
-    public ResponseEntity<List<User>> getAllUsersByDoctorId(@PathVariable(value = "doctorId") Long doctorId) {
+    public ResponseEntity<List<User>> getAllUsersByDoctorId(@PathVariable Long doctorId) {
         if (!doctorRepository.existsById(doctorId)) {
-            throw new ResourceNotFoundException("Not found Tutorial with id = " + doctorId);
+            throw new ResourceNotFoundException("Doctor not found with id = " + doctorId);
         }
         List<User> users = userRepository.findUsersByDoctorsId(doctorId);
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUsersById(@PathVariable(value = "id") Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found Tag with id = " + id));
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    @GetMapping("/users/{userId}/doctors")
-    public ResponseEntity<List<Doctor>> getAllDoctorsByUserId(@PathVariable(value = "userId") Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("Not found Tag  with id = " + userId);
-        }
-        List<Doctor> tutorials = doctorRepository.findDoctorsByUsersId(userId);
-        return new ResponseEntity<>(tutorials, HttpStatus.OK);
-    }
     @PostMapping("/doctors/{doctorId}/users")
-    public ResponseEntity<User> addUser(@PathVariable(value = "doctorId") Long doctorId, @RequestBody User userRequest) {
-//        User user = doctorRepository.findById(doctorId).map(doctor -> {
-//            long userId = userRequest.getId();
-//
-//            // tag is existed
-//            if (userId != 0L) {
-//                User _user = userRepository.findById(userId)
-//                        .orElseThrow(() -> new ResourceNotFoundException("Not found User with id = " + userId));
-//                doctor.addUser(_user);
-//                doctorRepository.save(doctor);
-//                return _user;
-//            }
-//
-//            // add and create new Tag
-//            doctor.addUser(userRequest);
-//            return userRepository.save(userRequest);
-//        }).orElseThrow(() -> new ResourceNotFoundException("Not found Doctor with id = " + doctorId));
-//        return new ResponseEntity<>(user, HttpStatus.CREATED);
-        Optional<Doctor> doctor = doctorRepository.findById(doctorId);
-        doctor.map(d -> {
-            d.addUser(userRequest);
-            return userRepository.save(userRequest);
-        });
-        return new ResponseEntity<>(userRequest, HttpStatus.OK);
-
-
+    public ResponseEntity<User> addUser(@PathVariable Long doctorId, @RequestBody User userRequest) {
+        return doctorRepository.findById(doctorId)
+                .map(doctor -> {
+                    doctor.addUser(userRequest);
+                    userRepository.save(userRequest);
+                    return ResponseEntity.ok(userRequest);
+                }).orElseThrow(() -> new ResourceNotFoundException("Doctor not found with id = " + doctorId));
     }
 
-
-
-//    @GetMapping("/users")
-//    public List<User> getAllUsers() {
-//        return userRepository.findAll();
-//    }
-
-//    @PostMapping("/users")
-//    public User setUser(@RequestBody User user){
-//
-//        return userRepository.save(user);
-//    }
-//    @GetMapping("/users/{id}")
-//    public ResponseEntity<User> getUserById(@PathVariable long id){
-//        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with the id: " +  id));
-//        return ResponseEntity.ok(user);
-//    }
-//
-//    @PutMapping("/users/{id}")
-//    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User userDetails){
-//        User updateUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with the id: " + id));
-//        updateUser.setFirstName(userDetails.getFirstName());
-//        updateUser.setSecondName((userDetails.getSecondName()));
-//        updateUser.setNumber(userDetails.getNumber());
-//        userRepository.save(updateUser);
-//        return ResponseEntity.ok(updateUser);
-//    }
-//    @DeleteMapping("/users/{id}")
-//    public ResponseEntity<HttpStatus> deleteUser(@PathVariable long id){
-//        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with the id: " + id));
-//        userRepository.delete(user);
-//
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
-//    @DeleteMapping("/users")
-//    public ResponseEntity<HttpStatus> deleteAll(){
-//        userRepository.deleteAll();
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
 
 
 
